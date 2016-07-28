@@ -2,11 +2,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
-#include "inicial.h"
 #define e 2.71828182845904523536
 #define PI 3.14159265358979323846
 
-double integrar(double dx,double *x,double *fx,int X);
+double complex integrar(double dx,double complex *fx,int X);
 
 void dissfunc(double *gamma,double *t,double *Ft,int Time);
 
@@ -14,9 +13,9 @@ void iniciarOMG(double *omega);
 
 void iniciarT(double *t);
 
-void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int SIZE,int OMG);
+void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG);
 
-void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int SIZE,int OMG);
+void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG);
 
 double complex fourier(double time, double complex *w, double *freq, double df, int OMG);
 
@@ -39,7 +38,7 @@ int main(){
   int Time=1000;
   int OMG=10000;
   double suma=0;
-  double dt=1.0/Time;
+  double dt=10.0/Time;
   double dw=1.0/OMG;
   double *omega;
   double complex *Vo; //frecuencias posibles y arreglo de potencial 
@@ -93,7 +92,7 @@ int main(){
   }
   fclose(f);
 
- //creando variables y arrelos que se usaran-------------------------------------------
+ //creando variables y arrelos que se usaran------------------------------------------- hasta aqui todo bien 
 
   double Vop=1.8; // eV
   double hbarc=0.19733; // ev Microm *c
@@ -108,23 +107,30 @@ int main(){
   printf("\nhbar=%f eV*microM\n",hbar);
   printf("\nm=%f eV\n",m);
   printf("\nd=%f microM\n",d);
-  printf("prueba %lf \n",hbar);
+  
   double *E;
   int steps=200;
-  double de=1.0/steps;
+  double de=2.0/steps;
   
   E=malloc(sizeof(double)*steps);
   
   for(int i=0;i<steps;i++){
-    E[i]=2*de*(i+1);
+    E[i]=de*(i+1);
     //printf("E[%d]=%f\n",i,E[i]);
   }
   
   for(i=0;i<OMG;i++){
     Vo[i]=Vop-hbar*omega[i];
-    //printf("Vo[%d]=%f\n",i,Vo[i]);
+
+    /**
+    if(i==0 || i==OMG-1){
+      printf("Vo[%d]=%f\n",i,creal(Vo[i]));}
+    */
   
   }
+
+ //creando variables y arrelos que se usaran------------------------------------------- hasta aqui todo bien 
+
 
   
   double complex *w;
@@ -135,15 +141,34 @@ int main(){
   
   
   double Energy=0.9;
+  // //**
+  //se crea la funcion que pesa el tiempo
+
   for(j=0;j<Time;j++){
-    t_func_dis_above(FuncD,Energy,Vop,Vo,d,m,hbarc,0,OMG);
+    t_func_dis_above(FuncD,Energy,Vop,Vo,d,m,hbarc,OMG);
     
     w[j]=Ft[j]*fourier(t[j],FuncD,omega,dw,OMG);
-  
   }
 
+  // se normaliza
 
+  double complex w_val=integrar(dt,w,Time);
+
+  printf("Valor Final=%f \n",creal(w_val));
   
+  for(i=0;i<Time;i++){
+  
+  w[i]=t[i]*w[i]/w_val;
+
+  }
+  
+  double final_value=creal(integrar(dt,w,Time));
+  
+  printf("Valor Final=%f \n",final_value);
+  
+  
+  //**/
+   
 
   return 0;
 }
@@ -178,7 +203,7 @@ void iniciarOMG(double *omega){
   }
 }
 
-double integrar(double dx,double *x,double *fx,int X){
+double complex integrar(double dx,double complex *fx,int X){
   double suma=0.0;
   int i;
 
@@ -206,7 +231,7 @@ double integrar(double dx,double *x,double *fx,int X){
 }
 
 
-void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int SIZE,int OMG){
+void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG){
   
   int i;
   double complex im=I*1.0;
@@ -223,7 +248,7 @@ void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,
 
 }
 
-void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int SIZE,int OMG){
+void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG){
   
   int i;
   double complex im=I*1.0;
