@@ -15,7 +15,11 @@ void iniciarT(double *t);
 
 void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG);
 
+double complex t_func_dis_above_val(double E,double Vop,double d, double m, double hbarc);
+
 void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG);
+
+double complex t_func_dis_bellow_val(double E,double Vop,double d, double m, double hbarc);
 
 double complex fourier(double time, double complex *w, double *freq, double df, int OMG);
 
@@ -147,7 +151,7 @@ int main(){
   for(j=0;j<Time;j++){
     t_func_dis_above(FuncD,Energy,Vop,Vo,d,m,hbarc,OMG);
     
-    w[j]=Ft[j]*fourier(t[j],FuncD,omega,dw,OMG);
+    w[j]=Ft[j]*fourier(t[j],FuncD,omega,dw,OMG)/t_func_dis_above_val(Energy,Vop,d,m,hbarc);
   }
 
   // se normaliza
@@ -248,6 +252,25 @@ void t_func_dis_above(double complex *w,double E,double Vop, double complex *Vo,
 
 }
 
+double complex t_func_dis_above_val(double E,double Vop,double d, double m, double hbarc){
+  
+  int i;
+  double complex im=I*1.0;
+  double k;
+  double complex kp;
+  double complex w;
+
+ 
+  k=sqrt(2*m*E*Vop)/hbarc;
+  kp=sqrt(2*m*(E-1.0)*Vop)/hbarc;
+  
+  w=-(2.0*im*k*kp*cexp(-im*k*d)) / ( (k*k + kp*kp)*csin(kp*d) + 2*im*k*kp*ccos(kp*d) ) ;
+   
+  return w;
+
+}
+
+
 void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo,double d, double m, double hbarc,int OMG){
   
   int i;
@@ -263,6 +286,23 @@ void t_func_dis_bellow(double complex *w,double E,double Vop, double complex *Vo
     
    
   }
+}
+
+double complex t_func_dis_bellow_val(double E,double Vop,double d, double m, double hbarc){
+  
+  int i;
+  double complex im=I*1.0;
+  double k;
+  double complex kp;
+  double complex w;
+ 
+  k=sqrt(2*m*E*Vop)/hbarc;
+  kp=sqrt(2*m*(1.0-E)*Vop)/hbarc;
+  
+  w=(2.0*k*kp*cexp(-im*k*d)) / ( (k*k - kp*kp)*im*csinh(kp*d) - 2*k*kp*ccosh(kp*d) );
+    
+   
+  return w;
 
 }
 
