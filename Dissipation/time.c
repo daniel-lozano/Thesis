@@ -9,7 +9,7 @@ double complex integrar(double dx,double complex *fx,int X);
 
 void dissfunc(double *gamma,double *t,double *Ft,int Time);
 
-void iniciarOMG(double *omega);
+void iniciarOMG(double *omega, int OMG,double dw,double limites);
 
 void iniciarT(double *t);
 
@@ -43,7 +43,8 @@ int main(){
   int OMG=10000;
   double suma=0;
   double dt=10.0/Time;
-  double dw=1.0/OMG;
+  double limites=1.0E6;
+  double dw=(limites)/OMG;
   double *omega;
   double complex *Vo; //frecuencias posibles y arreglo de potencial 
   double *t; //tiempo usado
@@ -52,7 +53,7 @@ int main(){
 
   omega=malloc(sizeof(double)*OMG);//arreglo de omega 
 
-  Vo=malloc(sizeof(double)*OMG);
+  Vo=malloc(sizeof(double complex)*OMG);
 
   t=malloc(sizeof(double)*Time);//arreglo de tiempo 
 
@@ -64,10 +65,11 @@ int main(){
 
   //iniciando arreglos de frecuencias y tiempo--------------------------------------------
 
-  iniciarOMG(omega);
+  iniciarOMG(omega,OMG,dw,limites);
+   
   iniciarT(t);
   
-  printf("valor min omega= %f valor max omega= %f\n",omega[0],omega[OMG]);
+  printf("valor min omega= %f valor max omega= %f\n",omega[0],omega[OMG-1]);
   printf("valor min t= %f valor max t= %f\n",t[0],t[Time]);
 
   
@@ -122,21 +124,18 @@ int main(){
     E[i]=de*(i+1);
     //printf("E[%d]=%f\n",i,E[i]);
   }
-  
+
   for(i=0;i<OMG;i++){
     Vo[i]=Vop-hbar*omega[i];
-
-    /**
-    if(i==0 || i==OMG-1){
-      printf("Vo[%d]=%f\n",i,creal(Vo[i]));}
-    */
-  
+    //printf("Vo[i] %e\n",creal(Vo[i]));
+    
   }
+    printf("aqui?\n");
 
  //creando variables y arrelos que se usaran------------------------------------------- hasta aqui todo bien 
 
 
-  
+ 
   double complex *w;
   double complex *FuncD;
   FuncD=malloc(sizeof(double complex)*OMG);
@@ -144,14 +143,17 @@ int main(){
 
   
   
-  double Energy=0.9;
-  // //**
+  double Energy=2.0;
+  //
   //se crea la funcion que pesa el tiempo
 
   for(j=0;j<Time;j++){
+      
     t_func_dis_above(FuncD,Energy,Vop,Vo,d,m,hbarc,OMG);
     
     w[j]=Ft[j]*fourier(t[j],FuncD,omega,dw,OMG)/t_func_dis_above_val(Energy,Vop,d,m,hbarc);
+      
+     
   }
 
   // se normaliza
@@ -198,13 +200,16 @@ void iniciarT(double *t){
   }
 }
 
-void iniciarOMG(double *omega){
-  int i;
-  int OMG=10000;
-  double dw=0.1;
-  for(i=0;i<=OMG;i++){
-    omega[i]=-1000+2.0*i*dw;
-  }
+void iniciarOMG(double *omega, int OMG,double dw,double limites){
+    int i;
+    
+    
+    for(i=0;i<OMG;i++){
+        
+        omega[i]=-limites+2.0*i*dw;
+        if(i==0 || i==OMG-1){
+            printf("valor de omega[i]=%e\n",omega[i]);}
+    }
 }
 
 double complex integrar(double dx,double complex *fx,int X){
