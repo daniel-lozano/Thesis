@@ -25,9 +25,9 @@ for i in range(len(E)):
     k=np.sqrt(2*m*Vo*(1-E[i]))/hbar
     kp=np.sqrt(2*m*Vo*E[i])/hbar
 
- 
-    result=2*
-    T_wkb[i]=result
+    result=2*m*(a*k*( pow(kp,2)-pow(k,2) ) + np.sinh(2*kp*a)*((pow(kp,2)+pow(k,2))/2*k*kp)   )/(( np.cosh(kp*a)*(pow(kp,2)+pow(k,2) ))**2 - (pow(kp,2)-pow(k,2) )**2  )
+    T_exact[i]=result
+
 
 
 
