@@ -67,7 +67,7 @@ for j in range(len(eta)):
         k=np.sqrt(2*m*Vo*(1-E[i]))/hbar
         kp=np.sqrt(2*m*Vo*(E[i]))/hbar
         
-        N_factor=np.sqrt(k*kp/(k**2+kp**2))
+        N_factor=2*np.sqrt(k*kp/(k**2+kp**2))
     
         funcion= lambda x: integrand(x,k,eta[j],hbar,m,a)
     
