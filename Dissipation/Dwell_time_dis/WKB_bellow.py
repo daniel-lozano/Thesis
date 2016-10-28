@@ -1,30 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import integrate
 
 
 
 '''
-%%%%%%%%%%%%%%%%%%%% Funciones utilizadas en el calculo del tiemo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% Funciones utilizadas en el calculo del tiempo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 '''
 
-def k(m,eta,Vo,E,hbar,x):#sheck
-    
-    k0=np.sqrt(2*m*Vo*(1-E))/hbar
-    
-    return np.sqrt(k0**2+(2*eta*k0*x)/hbar +(eta*x/hbar)**2 )
-
-
-def function(m,eta,Vo,E,hbar,x):
-    
-    k0=np.sqrt(2*m*Vo*(1-E))/hbar
-    
-    termino1=-0.5*(2*x+2*hbar*k0/eta)
-    
-    termino2=np.sqrt(k0**2 +(2*eta*k0*x)/hbar +(eta*x/hbar)**2  )
-    
-    termino3= (1/eta)*(4*hbar*k0**2)
-    
-    return np.exp(termino1*termino2+termino3)
+def integrand(x,k,eta,hbar,m,a):
+    exp=np.exp(-2*k*x*(1+eta*x/2))
+    div=1+eta*x
+    return exp/div
 
 '''
 %%%%%%%%%%%%%%%%%%%% Variables usadas en el calculo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -36,7 +23,7 @@ def function(m,eta,Vo,E,hbar,x):
 
 #definiendo energias adimensionales
 Ne=100
-E=np.linspace(0,0.99,Ne)
+E=np.linspace(0.01,0.99,Ne)
 
 #Constantes usadas
 
@@ -44,6 +31,7 @@ a=20.8E5#fermi
 Vo=1.8E-6
 m=0.5E6# MeV
 hbar=197.327# MeV*fermi =[hbar*c]
+
 print("\nmass=",m, " MeV")
 print("L=",a," fermi")
 print("Vo=",Vo, " MeV")
@@ -58,7 +46,7 @@ hbar_k_l=np.sqrt(2*m*Vo*(1-E[-1]))/a
 
 print("Condition:\neta <<",hbar_k_l)
 
-eta=[(hbar_k_l)*10**-2,hbar_k_l*10**-3,hbar_k_l*10**-4] # eV/Fermi
+eta=np.linspace(0,0.5,3)*10**(-7)/hbar_k_l # eV/Fermi
 
 print("eta=",eta)
 
@@ -69,53 +57,30 @@ T=np.zeros(len(E))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Comenzando el calculo %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 '''
 
-
-Nx=1000
-
-print("\nEnergies used\n",E)
-k=np.zeros(len(E))
-
-for i in range(len(E)):
-    k[i]=np.sqrt(2*m*Vo*(1-E[i]))/hbar
-
-plt.plot(E,k)
-plt.show()
-
-
 #defining the array for the intergration
 
-x=np.linspace(0,a,Nx)
-dx=abs(x[0]-x[1])
 
+for j in range(len(eta)):
 
-print("probando",function(m,eta[0],Vo,E[1],hbar,x[0]))
-
-
-for i in range(len(E)):
+    for i in range(len(E)):
     
-    #suma
-    suma=0
-    
-    #se empieza la integral
-    
-    
-    for j in range(len(x)):
+        k=np.sqrt(2*m*Vo*(1-E[i]))/hbar
+        kp=np.sqrt(2*m*Vo*(E[i]))/hbar
         
-        expo=function(m,eta[0],Vo,E[i],hbar,x[j])
+        N_factor=1#np.sqrt(k*kp/(k**2+kp**2))
     
-        Kfunc=k(m,eta[0],Vo,E[i],hbar,x[j])
+        funcion= lambda x: integrand(x,k,eta[j],hbar,m,a)
+    
+        resultados=integrate.quad(funcion,0,1,limit=100)
 
-        suma+=dx*(1/Kfunc)*expo
-    
-    #este es el tiempo hallado
-    T[i]=suma*m/hbar
+        T[i]=(N_factor**2)*(6.58*10**(-16))*(m*a/(hbar*k))*(resultados[0])/hbar
 
         
+    plt.plot(E,T)
 
-        
-
-
-
+#plt.figure(figsize=(20,10))
+plt.show()
+plt.savefig("Integral_disp_vel.png")
 
 
 
