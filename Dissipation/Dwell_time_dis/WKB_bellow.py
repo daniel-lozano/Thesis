@@ -23,13 +23,13 @@ def integrand(x,k,eta,hbar,m,a):
 
 #definiendo energias adimensionales
 Ne=100
-E=np.linspace(0.01,0.99,Ne)
+E=np.linspace(0.001,0.99,Ne)
 
 #Constantes usadas
 
 a=20.8E5#fermi
 Vo=1.8E-6
-m=0.5E6# MeV
+m=0.5# MeV
 hbar=197.327# MeV*fermi =[hbar*c]
 
 print("\nmass=",m, " MeV")
@@ -46,7 +46,7 @@ hbar_k_l=np.sqrt(2*m*Vo*(1-E[-1]))/a
 
 print("Condition:\neta <<",hbar_k_l)
 
-eta=np.linspace(0,0.5,3)*10**(-7)/hbar_k_l # eV/Fermi
+eta=np.linspace(0,0.1E-8,10)/hbar_k_l # eV/Fermi
 
 print("eta=",eta)
 
@@ -67,21 +67,26 @@ for j in range(len(eta)):
         k=np.sqrt(2*m*Vo*(1-E[i]))/hbar
         kp=np.sqrt(2*m*Vo*(E[i]))/hbar
         
-        N_factor=1#np.sqrt(k*kp/(k**2+kp**2))
+        N_factor=np.sqrt(k*kp/(k**2+kp**2))
     
         funcion= lambda x: integrand(x,k,eta[j],hbar,m,a)
     
         resultados=integrate.quad(funcion,0,1,limit=100)
 
-        T[i]=(N_factor**2)*(6.58*10**(-16))*(m*a/(hbar*k))*(resultados[0])/hbar
+        T[i]=(N_factor**1)*(6.58*10**(-16))*(m*a/(hbar*k))*(resultados[0])/hbar
+        nombre="$ \hat{\eta}= $"+str(eta[j])
 
         
-    plt.plot(E,T)
+    plt.plot(E,T,label=nombre)
 
 #plt.figure(figsize=(20,10))
-plt.show()
+
+plt.legend(loc=2)
+plt.xlabel("$  E/V_0 $",size=20)
+plt.ylabel(" $ Time $ ",size=20)
 plt.savefig("Integral_disp_vel.png")
 
+plt.show()
 
 
 
